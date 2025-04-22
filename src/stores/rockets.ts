@@ -4,11 +4,15 @@ import {
   generateRocketName,
   getRandomDescription,
 } from "@/utils";
+import type { IRocket } from "@/utils/type";
 import { defineStore } from "pinia";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 export const useRocketStore = defineStore("rockets", {
   state: () => ({
-    rockets: [] as any[],
+    rockets: [] as IRocket[],
     loading: false,
     error: false,
   }),
@@ -21,8 +25,12 @@ export const useRocketStore = defineStore("rockets", {
         const res = await fetch("https://api.spacexdata.com/v4/rockets");
         if (!res.ok) throw new Error();
         this.rockets = await res.json();
-      } catch (e) {
+      } catch {
         this.error = true;
+        router.push({
+          path: "/error",
+          query: { message: "Failed to load rocket data." },
+        });
       } finally {
         this.loading = false;
       }
